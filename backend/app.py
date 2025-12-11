@@ -24,7 +24,9 @@ feature_names = None
 def init_model_and_corr():
     global model, feature_names
 
-    # Charger ou entraîner le modèle
+    # Load or train the model
+
+
     if os.path.exists(MODEL_PATH):
         app.logger.info(f"Chargement du modèle depuis {MODEL_PATH}")
         with open(MODEL_PATH, "rb") as f:
@@ -35,7 +37,7 @@ def init_model_and_corr():
         with open(MODEL_PATH, "wb") as f:
             pickle.dump((model, feature_names), f)
 
-    # Générer les matrices de corrélation si besoin
+    # Generate the correlation matrices
     if not os.path.exists(CORR_DIR) or not all(
         os.path.exists(os.path.join(CORR_DIR, fname))
         for fname in ["corr_global.png", "corr_mean.png", "corr_error.png", "corr_worst.png"]
@@ -101,6 +103,7 @@ def correlation_worst():
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
+
 
 
 
