@@ -6,28 +6,28 @@ import pickle
 from sklearn.datasets import load_breast_cancer
 from sklearn.linear_model import LogisticRegression
 
-# Matplotlib en mode serveur (pas de fenêtre graphique)
+# Matplotlib in server mode (no graphical window)
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Dossier absolu du backend (là où se trouve ce fichier)
+# Absolute path to the backend (directory containing this file)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def load_data():
-    """Charge le jeu de données sur le cancer du sein."""
+    """Load the Breast Cancer dataset."""
     data = load_breast_cancer()
     df = pd.DataFrame(data.data, columns=data.feature_names)
     return df, data.feature_names, data.target
 
 
 def load_and_train_model():
-    """Charge les données et entraîne un modèle de régression logistique."""
+    """Load the data and train a logistic regression model."""
     df, feature_names, y = load_data()
 
-    # On garde le DataFrame pour éviter les warnings de scikit-learn
+    # Keep the DataFrame to avoid scikit-learn warnings
     X = df
 
     clf = LogisticRegression(max_iter=500, solver="liblinear")
@@ -36,7 +36,7 @@ def load_and_train_model():
 
 
 def predict_cancer(model, features, feature_names):
-    """Effectue une prédiction de cancer à partir des caractéristiques."""
+    """Perform a cancer prediction from the input features."""
     feature_df = pd.DataFrame([features], columns=feature_names)
     prediction = model.predict(feature_df)[0]
     probability = model.predict_proba(feature_df)[0][1]
@@ -44,15 +44,15 @@ def predict_cancer(model, features, feature_names):
 
 
 def generate_correlation_images():
-    """Génère et sauvegarde les matrices de corrélation pour les groupes de caractéristiques."""
+    """Generate and save correlation matrices for different feature groups."""
     df, feature_names, _ = load_data()
 
-    # Découpage mean / se / worst
+    # Split into mean / se / worst feature groups
     df_mean = df.iloc[:, :10]
     df_se = df.iloc[:, 10:20]
     df_worst = df.iloc[:, 20:]
 
-    # Dossier de sortie ABSOLU : backend/static/corr
+    # Absolute output directory: backend/static/corr
     output_dir = os.path.join(BASE_DIR, "static", "corr")
     os.makedirs(output_dir, exist_ok=True)
 
@@ -62,7 +62,7 @@ def generate_correlation_images():
 
         sns.heatmap(
             corr_matrix,
-            annot=annot,        # annot=False pour la globale, True pour les sous-blocs
+            annot=annot,        # annot=False for the global matrix, True for the sub-blocks
             fmt=".2f",
             cmap="coolwarm",
             square=True,
@@ -80,23 +80,23 @@ def generate_correlation_images():
         plt.savefig(path, dpi=120)
         plt.close()
 
-    # Global : sans annotations (30x30)
+    # Global matrix: no annotations (30x30)
     plot_corr(df, "Global", "corr_global.png", annot=False)
 
-    # Mean / Error / Worst : 10x10, on garde annot=True
+    # Mean / Error / Worst: 10x10, keep annot=True
     plot_corr(df_mean, "Mean", "corr_mean.png", annot=True)
     plot_corr(df_se, "Error", "corr_error.png", annot=True)
     plot_corr(df_worst, "Worst", "corr_worst.png", annot=True)
 
 
 if __name__ == "__main__":
-    # Entraîner le modèle
+    # Train the model
     model, feature_names = load_and_train_model()
 
-    # Générer les images
+    # Generate correlation matrix images
     generate_correlation_images()
 
-    # Exemple de prédiction
+    # Example prediction
     data = load_breast_cancer()
     X = data.data
     sample_features = X[0].tolist()
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     print(f"Probabilité de cancer malin (exemple): {probability:.4f}")
     print(f"Prédiction (exemple): {result}")
 
-    # Sauvegarder le modèle
+    # Save the trained model
     model_path = os.path.join(BASE_DIR, "model.pkl")
     with open(model_path, "wb") as f:
         pickle.dump((model, feature_names), f)
